@@ -1,44 +1,58 @@
 // app/dining/[hallId]/page.tsx
+"use client";
 
-interface DiningHallPageProps {
-    params: {
-      hallId: string;
+import { useEffect, useState } from 'react';
+import supabase from '@/app/lib/supabase';
+import { useRouter, useParams } from 'next/navigation';
+
+export default function DiningHallPage() {
+  const router = useRouter();
+  const params = useParams();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  const hallId = params?.hallId as string;
+
+  useEffect(() => {
+    // Check if user is authenticated
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        // Not logged in; redirect to /login
+        router.push('/login');
+      } else {
+        setIsSignedIn(true);
+      }
+      setIsLoading(false);
     };
+
+    checkSession();
+  }, [router]);
+
+  if (isLoading) {
+    return <p>Loading...</p>;
   }
-  
-  export default function DiningHallPage({ params }: DiningHallPageProps) {
-    const { hallId } = params;
-  
-    return (
-      <main style={styles.main}>
-        <h1 style={styles.heading}>Dining Hall: {hallId}</h1>
-        <p style={styles.paragraph}>
-          Here you can show details like recommended menu items, location,
-          AI-driven health suggestions, etc.
-        </p>
-      </main>
-    );
+
+  if (!isSignedIn) {
+    // This might never be seen if we redirect, but just in case
+    return <p>Redirecting to login...</p>;
   }
-  
-  const styles: Record<string, React.CSSProperties> = {
-    main: {
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '2rem',
-      fontFamily: 'sans-serif',
-    },
-    heading: {
-      fontSize: '2rem',
-      marginBottom: '1rem',
-    },
-    paragraph: {
-      marginBottom: '2rem',
-      maxWidth: '600px',
-      lineHeight: 1.5,
-      textAlign: 'center',
-    },
-  };
-  
+
+  return (
+    <main style={{ fontFamily: 'sans-serif', textAlign: 'center', marginTop: '5rem' }}>
+      <h1>Dining Hall: {hallId}</h1>
+      <p>Protected content: recommended menu items, location, etc.</p>
+      <button
+        onClick={async () => {
+          await supabase.auth.signOut();
+          router.push('/login');
+        }}
+      >
+        Sign Out
+      </button>
+    </main>
+  );
+}
