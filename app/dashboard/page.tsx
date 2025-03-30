@@ -256,7 +256,7 @@ export default function Dashboard() {
     setMealPlanLoading(false);
   };
 
-  // ---------- Parse the meal plan + fetch data from Supabase ----------
+  // ---------- Parse the meal plan + fetch data from Supabase (by name + hall) ----------
   useEffect(() => {
     if (!mealPlan) return;
 
@@ -290,16 +290,29 @@ export default function Dashboard() {
     const parsed = parseMealPlan(mealPlan);
     setParsedMeals(parsed);
 
-    // Gather all foods
-    const allFoods = parsed.flatMap((p) => p.foods);
+    // Build an OR condition for (food_name, dining_hall)
+    // e.g. or("and(food_name.eq.Scrambled Eggs,dining_hall.eq.Windsor),and(food_name.eq.Pasta,dining_hall.eq.Ford)")
+    const mealPairs = parsed.flatMap((p) =>
+      p.foods.map((f) => ({ foodName: f, diningHall: p.diningHall }))
+    );
 
-    // Fetch from Supabase
+    const orClauses = mealPairs.map(
+      (mp) =>
+        `and(food_name.eq.${encodeURIComponent(mp.foodName)},dining_hall.eq.${encodeURIComponent(
+          mp.diningHall
+        )})`
+    );
+    const orString = orClauses.join(",");
+
+    // Fetch from Supabase with or()
     const fetchFoodDetails = async () => {
       try {
+        if (!orString) return;
+
         const { data, error } = await supabase
           .from("food_data")
           .select("*")
-          .in("food_name", allFoods);
+          .or(orString);
 
         if (error) {
           console.error("Error fetching food details:", error.message);
@@ -324,16 +337,19 @@ export default function Dashboard() {
     }
   };
 
-  // ---------- Helper to find a food's data ----------
-  const getFoodData = (foodName: string) => {
-    return foodDetails.find((item) => item.food_name === foodName);
+  // ---------- Helper to find a food's data (match by name + hall) ----------
+  const getFoodData = (foodName: string, hall: string) => {
+    return foodDetails.find(
+      (item) =>
+        item.food_name === foodName && item.dining_hall === hall
+    );
   };
 
   // ---------- Toggle expand/collapse for a food item ----------
-  const toggleExpand = (foodName: string) => {
+  const toggleExpand = (key: string) => {
     setExpandedFoods((prev) => ({
       ...prev,
-      [foodName]: !prev[foodName],
+      [key]: !prev[key],
     }));
   };
 
@@ -368,7 +384,9 @@ export default function Dashboard() {
           {/* ----- Title ----- */}
           <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
             <h2 style={styles.mainHeading}>Nutrition Dashboard</h2>
-            <p style={styles.subTitle}>Enter your details to receive a personalized AI-based meal plan</p>
+            <p style={styles.subTitle}>
+              Enter your details to receive a personalized AI-based meal plan
+            </p>
           </div>
 
           {/* ----- Profile Form ----- */}
@@ -404,18 +422,6 @@ export default function Dashboard() {
                   <option value="other">Other</option>
                 </select>
               </div>
-
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <label style={styles.label}>Dietary Restrictions</label>
-                <input
-                  type="text"
-                  name="restrictions"
-                  value={formData.restrictions}
-                  onChange={handleChange}
-                  style={styles.input}
-                />
-              </div>
-
               <div style={{ display: "flex", flexDirection: "column" }}>
                 <label style={styles.label}>Weight Goal</label>
                 <select
@@ -578,10 +584,11 @@ export default function Dashboard() {
                   </h3>
                   <div>
                     {mealItem.foods.map((food) => {
-                      const fData = getFoodData(food);
-                      // Unique key in case multiple items share the same name
                       const uniqueKey = `${mealItem.meal}-${mealItem.diningHall}-${food}`;
                       const expanded = expandedFoods[uniqueKey] || false;
+
+                      // Use new helper that checks name + hall
+                      const fData = getFoodData(food, mealItem.diningHall);
 
                       return (
                         <div key={uniqueKey} style={styles.foodItem}>
@@ -593,9 +600,13 @@ export default function Dashboard() {
                               {food}
                             </p>
                             {/* Right-side info (Calories, Protein) */}
-                            {fData && (
+                            {fData ? (
                               <p style={styles.foodOverview}>
                                 {fData.calorie || "?"} cal, {fData.protein || "?"}g protein
+                              </p>
+                            ) : (
+                              <p style={styles.foodOverview}>
+                                <em style={{ color: "#888" }}>No data found</em>
                               </p>
                             )}
                             <span style={styles.caret}>
@@ -621,7 +632,7 @@ export default function Dashboard() {
 
                           {expanded && !fData && (
                             <p style={{ marginLeft: "1rem", color: "#888" }}>
-                              <em>Loading data...</em>
+                              <em>There is no additional data available.</em>
                             </p>
                           )}
                         </div>
