@@ -260,11 +260,6 @@ export default function Dashboard() {
   useEffect(() => {
     if (!mealPlan) return;
 
-    // Example mealPlan lines:
-    //   1) "Windsor ::: Scrambled Eggs, Hard Cooked Eggs, Smokey Links"
-    //   2) "Ford ::: Chicken Caesar Salad, Pasta"
-    //   3) "Hillenbrand ::: Salmon, Rice"
-
     function parseMealPlan(mealPlanText: string): MealPlanItem[] {
       const lines = mealPlanText
         .split("\n")
@@ -375,143 +370,159 @@ export default function Dashboard() {
 
           {/* ----- Profile Form ----- */}
           <form onSubmit={handleSubmit} style={styles.card}>
-            <div style={styles.grid}>
-              {[
-                { field: "startingWeight", label: "Weight (lbs)" },
-                { field: "heightInches", label: "Height (inches)" },
-              ].map(({ field, label }) => (
-                <div key={field} style={{ display: "flex", flexDirection: "column" }}>
-                  <label style={styles.label}>{label}</label>
+            <h3 style={{ color: "#CEB888", marginBottom: "1.5rem", textAlign: "center" }}>
+              Profile Information
+            </h3>
+            <div style={styles.twoColumnGrid}>
+              <div style={styles.formColumn}>
+                <div style={styles.formRow}>
+                  <label style={styles.label}>Weight (lbs)</label>
                   <input
                     type="number"
-                    name={field}
-                    value={formData[field as keyof typeof formData] as string}
+                    name="startingWeight"
+                    value={formData.startingWeight}
                     onChange={handleChange}
                     style={styles.input}
                   />
                 </div>
-              ))}
 
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <label style={styles.label}>Gender</label>
-                <select
-                  name="gender"
-                  value={formData.gender}
-                  onChange={handleChange}
-                  style={styles.input}
-                >
-                  <option value="">Select Gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <label style={styles.label}>Weight Goal</label>
-                <select
-                  name="goal"
-                  value={formData.goal}
-                  onChange={handleChange}
-                  style={styles.input}
-                >
-                  <option value="">Select Goal</option>
-                  <option value="gain">Gain Weight</option>
-                  <option value="lose">Lose Weight</option>
-                  <option value="maintain">Maintain Weight</option>
-                </select>
-              </div>
+                <div style={styles.formRow}>
+                  <label style={styles.label}>Height (inches)</label>
+                  <input
+                    type="number"
+                    name="heightInches"
+                    value={formData.heightInches}
+                    onChange={handleChange}
+                    style={styles.input}
+                  />
+                </div>
 
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <label style={styles.label}>Latitude</label>
-                <input
-                  type="number"
-                  name="userLat"
-                  value={formData.userLat}
-                  onChange={handleChange}
-                  style={styles.input}
-                />
-              </div>
-
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <label style={styles.label}>Longitude</label>
-                <input
-                  type="number"
-                  name="userLon"
-                  value={formData.userLon}
-                  onChange={handleChange}
-                  style={styles.input}
-                />
-              </div>
-
-              {/* Allergies dropdown */}
-              <div style={{ gridColumn: "span 3", position: "relative" }}>
-                <label style={styles.label}>Allergies</label>
-                <div style={{ marginTop: "0.5rem" }}>
-                  <button
-                    type="button"
-                    onClick={() => setShowAllergens(!showAllergens)}
-                    style={{
-                      ...styles.input,
-                      textAlign: "left",
-                      width: "100%",
-                      cursor: "pointer",
-                    }}
+                <div style={styles.formRow}>
+                  <label style={styles.label}>Gender</label>
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    style={styles.input}
                   >
-                    {formData.allergies.length > 0
-                      ? formData.allergies.join(", ")
-                      : "Select Allergies"}
-                  </button>
-                  {showAllergens && (
-                    <div style={styles.allergyDropdown}>
-                      {ALLERGEN_OPTIONS.map((option) => (
-                        <label
-                          key={option}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                            marginBottom: "0.5rem",
-                            color: "#ccc",
-                          }}
-                        >
-                          <input
-                            type="checkbox"
-                            value={option}
-                            checked={formData.allergies.includes(option)}
-                            onChange={handleCheckboxChange}
-                          />
-                          {option}
-                        </label>
-                      ))}
-                    </div>
-                  )}
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+
+                <div style={styles.formRow}>
+                  <label style={styles.label}>Activity Level</label>
+                  <select
+                    name="activity"
+                    value={formData.activity}
+                    onChange={handleChange}
+                    style={styles.input}
+                  >
+                    <option value="low">Low Activity</option>
+                    <option value="moderate">Moderate Activity</option>
+                    <option value="high">High Activity</option>
+                  </select>
                 </div>
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <label style={styles.label}>Activity Level</label>
-                <select
-                  name="activity"
-                  value={formData.activity}
-                  onChange={handleChange}
-                  style={styles.input}
-                >
-                  <option value="low">Low Activity</option>
-                  <option value="moderate">Moderate Activity</option>
-                  <option value="high">High Activity</option>
-                </select>
-              </div>
+              <div style={styles.formColumn}>
+                <div style={styles.formRow}>
+                  <label style={styles.label}>Weight Goal</label>
+                  <select
+                    name="goal"
+                    value={formData.goal}
+                    onChange={handleChange}
+                    style={styles.input}
+                  >
+                    <option value="">Select Goal</option>
+                    <option value="gain">Gain Weight</option>
+                    <option value="lose">Lose Weight</option>
+                    <option value="maintain">Maintain Weight</option>
+                  </select>
+                </div>
 
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <label style={styles.label}>Preferred Food</label>
-                <input
-                  type="text"
-                  name="preferredFood"
-                  value={formData.preferredFood}
-                  onChange={handleChange}
-                  style={styles.input}
-                  placeholder="e.g. Chicken, Salmon, Pasta..."
-                />
+                <div style={styles.formRow}>
+                  <label style={styles.label}>Latitude</label>
+                  <input
+                    type="number"
+                    name="userLat"
+                    value={formData.userLat}
+                    onChange={handleChange}
+                    style={styles.input}
+                  />
+                </div>
+
+                <div style={styles.formRow}>
+                  <label style={styles.label}>Longitude</label>
+                  <input
+                    type="number"
+                    name="userLon"
+                    value={formData.userLon}
+                    onChange={handleChange}
+                    style={styles.input}
+                  />
+                </div>
+
+                <div style={styles.formRow}>
+                  <label style={styles.label}>Preferred Food</label>
+                  <input
+                    type="text"
+                    name="preferredFood"
+                    value={formData.preferredFood}
+                    onChange={handleChange}
+                    style={styles.input}
+                    placeholder="e.g. Chicken, Salmon, Pasta..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Allergies and Restrictions Row */}
+            <div style={styles.extraRow}>
+
+              <div style={{ flex: 1, position: "relative" }}>
+                <label style={styles.label}>Allergies</label>
+                <button
+                  type="button"
+                  onClick={() => setShowAllergens(!showAllergens)}
+                  style={{
+                    ...styles.input,
+                    textAlign: "left",
+                    width: "100%",
+                    cursor: "pointer",
+                    marginTop: "0.5rem",
+                  }}
+                >
+                  {formData.allergies.length > 0
+                    ? formData.allergies.join(", ")
+                    : "Select Allergies"}
+                </button>
+                {showAllergens && (
+                  <div style={styles.allergyDropdown}>
+                    {ALLERGEN_OPTIONS.map((option) => (
+                      <label
+                        key={option}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          marginBottom: "0.5rem",
+                          color: "#ccc",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          value={option}
+                          checked={formData.allergies.includes(option)}
+                          onChange={handleCheckboxChange}
+                        />
+                        {option}
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -529,7 +540,7 @@ export default function Dashboard() {
                 (e.currentTarget as HTMLElement).style.transform = "none";
               }}
             >
-              Save and Continue
+              Update Profile
             </button>
           </form>
 
@@ -571,6 +582,15 @@ export default function Dashboard() {
                       const uniqueKey = `${mealItem.meal}-${mealItem.diningHall}-${food}`;
                       const expanded = expandedFoods[uniqueKey] || false;
                       const fData = getFoodData(food);
+
+                      // If protein is missing or "?", show "Protein not found"
+                      let proteinLabel = "";
+                      if (!fData || !fData.protein || fData.protein === null) {
+                        proteinLabel = "Protein not found";
+                      } else {
+                        proteinLabel = `${fData.protein}g protein`;
+                      }
+
                       return (
                         <div key={uniqueKey} style={styles.foodItem}>
                           <div
@@ -583,7 +603,7 @@ export default function Dashboard() {
                             {/* Right-side info (Calories, Protein) */}
                             {fData ? (
                               <p style={styles.foodOverview}>
-                                {fData.calorie || "?"} cal, {fData.protein || "?"}g protein
+                                {fData.calorie || "?"} cal, {proteinLabel}
                               </p>
                             ) : (
                               <p style={styles.foodOverview}>
@@ -709,10 +729,25 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
     animation: "slideUp 0.8s ease-out",
   },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
-    gap: "1.5rem",
+  twoColumnGrid: {
+    display: "flex",
+    gap: "2rem",
+    marginBottom: "1.5rem",
+  },
+  formColumn: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    gap: "1rem",
+  },
+  formRow: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  extraRow: {
+    display: "flex",
+    gap: "1rem",
+    marginBottom: "1rem",
   },
   label: {
     fontSize: "0.9rem",
@@ -728,7 +763,7 @@ const styles: Record<string, React.CSSProperties> = {
     transition: "border 0.3s ease",
   },
   button: {
-    marginTop: "2rem",
+    marginTop: "1rem",
     width: "100%",
     backgroundColor: "#CEB888",
     color: "#000",
