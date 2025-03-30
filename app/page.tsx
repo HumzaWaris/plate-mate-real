@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import supabase from "./lib/supabase";
 
 interface Profile {
-  school?: string;
-  dietary_preferences?: string; // or string[] if you store arrays
+  restrictions?: string; // or string[] if you store arrays
   allergies?: string;          // or string[] if you store arrays
 }
 
@@ -35,7 +34,7 @@ export default function HomePage() {
       // 2) Fetch the user's profile data
       const { data: profileData, error } = await supabase
         .from("profiles")
-        .select("school, dietary_preferences, allergies")
+        .select("restrictions, allergies")
         .eq("user_id", session.user.id)
         .single();
 
@@ -82,7 +81,7 @@ export default function HomePage() {
       <main style={styles.main}>
         <h2>No profile data found</h2>
         <p>Please finish your setup.</p>
-        <button style={styles.button} onClick={() => router.push("/setup")}>
+        <button style={styles.button} onClick={() => router.push("/dashboard")}>
           Go to Setup
         </button>
 
@@ -100,7 +99,7 @@ export default function HomePage() {
     <main style={styles.main}>
       <h1>Welcome to the Dining App</h1>
       <p style={styles.paragraph}>
-        Below is some information from your profile. You can use these details 
+        Below is some information from your profile. You can use these details
         for personalized dining recommendations or other features in your project.
       </p>
 

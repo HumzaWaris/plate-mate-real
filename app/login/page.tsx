@@ -26,7 +26,7 @@ export default function LoginPage() {
     }
 
     // If successful, go to /auth-callback
-    router.push("/auth-callback");
+    router.push("/dashboard");
   };
 
   // --- Google OAuth Login ---
@@ -36,7 +36,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_REDIRECT_URL}/auth-callback`,
+        redirectTo: `${process.env.NEXT_PUBLIC_REDIRECT_URL}/dashboard`,
       },
     });
 
