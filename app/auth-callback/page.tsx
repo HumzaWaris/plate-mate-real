@@ -49,7 +49,7 @@ export default function AuthCallbackPage() {
           router.push("/");
           return;
         }
-        router.push("/setup");
+        router.push("/dashboard");
       } else {
         // If user already has a profile => go to main page
         router.push("/");
