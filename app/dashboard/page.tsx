@@ -172,50 +172,34 @@ export default function Dashboard() {
     e.preventDefault();
     if (!user) return;
 
-    const { data: existingProfile, error: fetchError } = await supabase
-      .from("profiles")
-      .select("user_id")
-      .eq("user_id", user.id)
-      .single();
-
-    if (fetchError && fetchError.code !== "PGRST116") {
-      console.error("Error checking existing user:", fetchError.message);
-      return;
-    }
-
     const allergiesString = formData.allergies.join(", ");
 
     const payload = {
-      ...formData,
       user_id: user.id,
       startingWeight: formData.startingWeight
         ? Number(formData.startingWeight)
         : null,
       heightInches: formData.heightInches ? Number(formData.heightInches) : null,
-      allergies: allergiesString,
+      gender: formData.gender || null,
+      restrictions: formData.restrictions || null,
+      allergies: allergiesString || null,
+      activity: formData.activity || "moderate",
+      goal: formData.goal || null,
+      userLat: formData.userLat ? Number(formData.userLat) : null,
+      userLon: formData.userLon ? Number(formData.userLon) : null,
+      preferredFood: formData.preferredFood || null,
     };
 
-    if (existingProfile) {
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update(payload)
-        .eq("user_id", user.id);
+    // Use upsert to handle both insert and update
+    const { error } = await supabase
+      .from("profiles")
+      .upsert(payload, { onConflict: "user_id" });
 
-      if (updateError) {
-        console.error("Error updating user profile:", updateError.message);
-      } else {
-        alert("Profile updated successfully!");
-      }
+    if (error) {
+      console.error("Error saving profile:", error.message);
+      alert("Error saving profile: " + error.message);
     } else {
-      const { error: insertError } = await supabase
-        .from("profiles")
-        .insert([payload]);
-
-      if (insertError) {
-        console.error("Error inserting new profile:", insertError.message);
-      } else {
-        alert("Profile created successfully!");
-      }
+      alert("Profile saved successfully!");
     }
   };
 

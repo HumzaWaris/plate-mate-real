@@ -37,17 +37,16 @@ export default function AuthCallbackPage() {
         return;
       }
 
-      // 3) If no existing profile, create a row => direct them to /setup
+      // 3) If no existing profile, create a row => direct them to /dashboard
       if (!existingProfile) {
+        // Use upsert to avoid duplicate key errors
         const { error: insertError } = await supabase
           .from("profiles")
-          .insert({ user_id: user.id });
+          .upsert({ user_id: user.id }, { onConflict: "user_id" });
 
         if (insertError) {
           console.error("Error creating profile:", insertError.message);
-          // Fallback, send them to main page or show error
-          router.push("/");
-          return;
+          // Even if there's an error, try to proceed to dashboard
         }
         router.push("/dashboard");
       } else {
